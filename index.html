@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сервіс оренди речей</title>
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        font-family: Arial, sans-serif;
+        background:#f0f2f5;
+    }
+    .logo {
+        height: 90px; /* РОЗМІР ЛОГО */
+        width: auto;
+    }
+    #auth-section {
+        max-width: 500px;
+        width: 100%;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-sizing: border-box;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    #auth-section:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        background: #f9f9f9;
+    }
+
+    header {
+        background: linear-gradient(90deg, #4ec652, #2E8B57);
+        color:white;
+        padding:15px;
+        text-align:center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .container {
+        max-width: 900px;
+        margin: 20px auto;
+        background:white;
+        padding:20px;
+        border-radius:10px;
+        box-shadow:0 0 10px rgba(0,0,0,0.1);
+    }
+    input, textarea {
+        padding:10px;
+        margin:5px 0;
+        width:100%;
+        border-radius:5px;
+        border:1px solid #ccc;
+        box-sizing: border-box;
+    }
+    button {
+        padding:10px 20px;
+        border-radius:20px;
+        border:none;
+        background:#4CAF50;
+        color:white;
+        cursor:pointer;
+        width:auto;
+        display:block;
+        margin:10px auto;
+    }
+    .container h2 {
+        text-align: center;
+    }  
+    #products-list {
+        display: flex;
+        flex-wrap: wrap;
+        position: relative;
+        justify-content: space-between;
+    }
+    .product {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .product-info {
+        width: 60%;
+    }
+    .product img {
+        width: 35%;
+        height: auto;
+        border-radius: 10px;
+        object-fit: cover;
+    }
+    #product-section {
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+        background: white;
+    }
+    #product-section:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        background: #f9f9f9;
+    }
+    #chat-section:hover,
+    #available-products-section:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        background: #f9f9f9;
+        transition: all 0.3s ease;
+    }
+    #chat-section,
+    #available-products-section {
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+        background: white;
+    }
+    #products-list .product {
+        width: 48%;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+    }
+    button:hover { background:#45a049; }
+    .chat { border:1px solid #ccc; padding:10px; height:300px; overflow-y:auto; margin-bottom:10px; border-radius:10px; background:#f9f9f9;}
+    .chat-message { margin-bottom:5px; }
+    .chat-message span { font-weight:bold; }
+    footer {
+        background:#333;
+        color:white;
+        text-align:center;
+        padding:15px;
+        margin-top: auto;
+    }
+    @media (max-width:600px){
+        .container { margin: 10px; padding:15px; }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <img src="logo.png" alt="Лого" class="logo">
+    <h1>Сервіс оренди речей</h1>  
+</header>
+
+<!-- Авторизація -->
+<div class="container" id="auth-section">
+    <h2>Авторизація</h2>
+    <input type="text" id="first-name" placeholder="Name">
+    <input type="text" id="last-name" placeholder="Surname">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Sign up</button>
+</div>
+
+<!-- Сторінка свого товару -->
+<div class="container" id="product-section" style="display:none;">
+    <h2>Додати свій товар для оренди</h2>
+    <input type="text" id="product-name-input" placeholder="Назва товару">
+    <input type="number" id="product-price-input" placeholder="Ціна оренди (грн)">
+    <textarea id="product-desc-input" placeholder="Опис товару"></textarea>
+    <input type="file" id="upload-img" onchange="previewImage(event)">
+    <button onclick="addProduct()">Додати товар</button>
+
+    <!-- Виправлений блок для відображення товару -->
+    <div class="product" style="margin-top:20px; flex-direction: column; align-items: flex-start; gap:5px;">
+        <h3 id="product-name">Тут буде назва товару</h3>
+        <img id="product-img" src="https://via.placeholder.com/400x300" alt="Товар" style="width:100%; max-width:400px; height:auto; margin-top:10px;">
+        <p id="product-desc" style="margin:5px 0;">Тут буде опис товару</p>
+        <p style="margin:5px 0;">Оренда на день: <span id="product-price">0</span> грн</p>
+        <button onclick="confirmRental()">Підтвердити оренду</button>
+    </div> 
+</div>
+
+<!-- Доступні товари для оренди (чужі) -->
+<div class="container" id="available-products-section" style="display:none;">
+    <h2>Доступні товари для оренди</h2>
+    <div id="products-list"></div>
+</div>
+
+<!-- Чат -->
+<div class="container" id="chat-section" style="display:none;">
+    <h2>Чат</h2>
+    <div class="chat" id="chat-box"></div>
+    <input type="text" id="chat-input" placeholder="Введіть повідомлення...">
+    <button onclick="sendMessage()">Відправити</button>
+</div>
+
+<footer>
+    <p>© 2025 Сервіс оренди речей. Усі права захищені.</p>
+    <p>Контакти: <a href="mailto:info@rentservice.ua" style="color:#4CAF50;">info@rentservice.ua</a></p>
+</footer>
+
+<script>
+let currentUser = {
+    firstName: '',
+    lastName: '',
+    email: ''
+};
+
+let products = [
+    {id:1, name:'Великий рюкзак', desc:'Червоний, 50л', price:50, owner:'Іван', rented:false, img: "bag.png"},
+    {id:2, name:'Малий велосипед', desc:'Для дітей 6-10 років', price:30, owner:'Оля', rented:false, img: "bike.png"},
+    {id:3, name:'Скейтборд', desc:'Синій, для підлітків', price:40, owner:'Петро', rented:false, img:"board.png"},
+    {id:4, name:'Камера GoPro', desc:'Відео 4K, фото 12Мп', price:20, owner:'Марія', rented:false, img:"camera.png"},
+];
+
+function login() {
+    const firstName = document.getElementById('first-name').value.trim();
+    const lastName = document.getElementById('last-name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if(firstName === '' || lastName === '' || email === '') {
+        alert('Заповніть усі поля');
+        return;
+    }
+
+    currentUser.firstName = firstName;
+    currentUser.lastName = lastName;
+    currentUser.email = email;
+
+    document.getElementById('auth-section').style.display = 'none';
+    document.getElementById('product-section').style.display = 'block';
+    document.getElementById('chat-section').style.display = 'block';
+
+    addMessage('Система', `${currentUser.firstName} приєднався до чату`);
+
+    afterLogin();
+}
+
+function addProduct() {
+    const name = document.getElementById('product-name-input').value.trim();
+    const price = document.getElementById('product-price-input').value.trim();
+    const desc = document.getElementById('product-desc-input').value.trim();
+
+    if(name === '' || price === '' || desc === '') {
+        alert('Заповніть всі поля товару');
+        return;
+    }
+
+    document.getElementById('product-name').textContent = name;
+    document.getElementById('product-price').textContent = price;
+    document.getElementById('product-desc').textContent = desc;
+
+    addMessage('Система', `${currentUser.firstName} додав товар "${name}" для оренди`);
+}
+
+function showProducts() {
+    const list = document.getElementById('products-list');
+    list.innerHTML = '';
+
+    products.forEach(product => {
+        const div = document.createElement('div');
+        div.className = 'product';
+
+        const imgSrc = product.img ? product.img : "https://via.placeholder.com/300x200";
+
+        div.innerHTML = `
+            <div class="product-info">
+                <h3>${product.name}</h3>
+                <p>${product.desc}</p>
+                <p>Власник: ${product.owner}</p>
+                <p>Ціна оренди: ${product.price} грн</p>
+
+                <label>Дата початку:</label>
+                <input type="datetime-local" id="start-${product.id}">
+
+                <label>Дата завершення:</label>
+                <input type="datetime-local" id="end-${product.id}">
+
+                <button ${product.rented ? 'disabled' : ''} onclick="rentProduct(${product.id})">
+                    ${product.rented ? 'Заброньований' : 'Орендувати'}
+                </button>
+            </div>
+            <div style="flex:0 0 150px;">
+                <img src="${imgSrc}" alt="${product.name}" style="width:150px; height:120px; object-fit:cover; border-radius:10px;">
+            </div>
+        `;
+
+        list.appendChild(div);
+    });
+}
+
+function rentProduct(id) {
+    const product = products.find(p => p.id === id);
+    if(!product.rented) {
+        product.rented = true;
+        addMessage('Система', `${currentUser.firstName} орендував товар "${product.name}" у ${product.owner}`);
+        showProducts();
+    }
+}
+
+function afterLogin() {
+    document.getElementById('available-products-section').style.display = 'block';
+    showProducts();
+}
+
+function addMessage(user, text) {
+    const chatBox = document.getElementById('chat-box');
+    const msg = document.createElement('div');
+    msg.className = 'chat-message';
+    msg.innerHTML = `<span>${user}:</span> ${text}`;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if(text === '') return;
+    addMessage(currentUser.firstName, text);
+    input.value = '';
+}
+
+function confirmRental() {
+    alert('Оренда підтверджена!');
+    addMessage('Система', `${currentUser.firstName} (${currentUser.email}) орендував товар`);
+}
+
+function previewImage(event) {
+    const file = event.target.files[0];
+    const img = document.getElementById('product-img');
+
+    if(file) {
+        img.src = URL.createObjectURL(file);
+    } else {
+        img.src = "https://via.placeholder.com/400x300";
+    }
+} 
+</script>
+</body>
+</html>
+
